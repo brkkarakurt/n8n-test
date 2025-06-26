@@ -118,28 +118,34 @@
 </div>
 
 <script>
-  const webhookURL = "https://burakkarakurt.app.n8n.cloud/webhook-test/ec2aff1f-0b8f-46c1-b43a-0c36241cff13";
+  const webhookURL = "https://burakkarakurt.app.n8n.cloud/webhook/ec2aff1f-0b8f-46c1-b43a-0c36241cff13"; // Production URL olduğundan emin ol
 
   async function sendMessage() {
     const input = document.getElementById("userInput");
     const message = input.value.trim();
     if (!message) return;
 
-    // Kullanıcı mesajını göster
     addMessage("Sen", message, "user");
     input.value = "";
 
-    // AI Agent'a gönder
-    const response = await fetch(webhookURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message })
-    });
+    try {
+      const response = await fetch(webhookURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userMessage: message, // 🔧 mesajı bu isimle gönder
+          sessionId: "user-1234" // 🧠 simple memory için sabit session ID önerilir
+        })
+      });
 
-    const data = await response.json();
-    addMessage("Bot", data.reply || "Bir şeyler ters gitti...", "bot");
+      const data = await response.json();
+      addMessage("Bot", data.reply || "Bir şeyler ters gitti...", "bot");
+    } catch (err) {
+      addMessage("Bot", "Sunucuya ulaşılamadı.", "bot");
+      console.error(err);
+    }
   }
 
   function addMessage(sender, text, type) {
