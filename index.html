@@ -106,71 +106,84 @@
 
 
   <div id="chatbox" style="position: fixed; bottom: 20px; right: 20px; width: 320px; max-height: 400px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: white; display: flex; flex-direction: column; overflow: hidden; font-family: Arial, sans-serif;">
-  <div style="background: #333; color: white; padding: 10px; text-align: center;">Asistan</div>
-  <div id="messages" style="flex: 1; padding: 10px; overflow-y: auto; font-size: 14px;"></div>
-  <div style="display: flex; border-top: 1px solid #ddd;">
-    <input type="text" id="userInput" placeholder="Mesajınızı yazın..." style="flex: 1; border: none; padding: 10px;">
-    <button onclick="sendMessage()" style="border: none; background: #007bff; color: white; padding: 10px;">Gönder</button>
+    <div style="background: #333; color: white; padding: 10px; text-align: center;">Güzide Gençlik Merkezi</div>
+    <div id="messages" style="flex: 1; padding: 10px; overflow-y: auto; font-size: 14px;"></div>
+    <div style="display: flex; border-top: 1px solid #ddd;">
+      <input type="text" id="userInput" placeholder="Mesajınızı yazın..." style="flex: 1; border: none; padding: 10px;">
+      <button onclick="sendMessage()" style="border: none; background: #007bff; color: white; padding: 10px;">Gönder</button>
+    </div>
   </div>
-</div>
 
-<script>
-  const webhookURL = "https://burakkarakurt.app.n8n.cloud/webhook/ec2aff1f-0b8f-46c1-b43a-0c36241cff13"; // Üretim URL'si olduğundan emin olun
+  <script>
+    const webhookURL = "https://burakkarakurt.app.n8n.cloud/webhook/ec2aff1f-0b8f-46c1-b43a-0c36241cff13"; // Üretim URL'si olduğundan emin olun
 
-  // Benzersiz bir oturum ID'si oluştur veya mevcut olanı kullan
-  function getSessionId() {
-    let sessionId = localStorage.getItem('chatbotSessionId');
-    if (!sessionId) {
-      // Eğer yoksa, yeni ve benzersiz bir ID oluştur (UUID v4 gibi)
-      sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0,
-            v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-      localStorage.setItem('chatbotSessionId', sessionId);
+    // Benzersiz bir oturum ID'si oluştur veya mevcut olanı kullan
+    function getSessionId() {
+      let sessionId = localStorage.getItem('chatbotSessionId');
+      if (!sessionId) {
+        // Eğer yoksa, yeni ve benzersiz bir ID oluştur (UUID v4 gibi)
+        sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0,
+              v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+        localStorage.setItem('chatbotSessionId', sessionId);
+      }
+      return sessionId;
     }
-    return sessionId;
-  }
 
-  async function sendMessage() {
-    const input = document.getElementById("userInput");
-    const message = input.value.trim();
-    if (!message) return;
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
 
-    addMessage("Sen", message, "user");
-    input.value = "";
+      addMessage("Sen", message, "user");
+      input.value = "";
 
-    const currentSessionId = getSessionId(); // Burada benzersiz oturum ID'sini alıyoruz
+      const currentSessionId = getSessionId(); // Burada benzersiz oturum ID'sini alıyoruz
 
-    try {
-      const response = await fetch(webhookURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          userMessage: message,
-          sessionId: currentSessionId // Buraya dinamik olarak oluşturulan ID'yi gönderiyoruz
-        })
-      });
+      try {
+        const response = await fetch(webhookURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            userMessage: message,
+            sessionId: currentSessionId // Buraya dinamik olarak oluşturulan ID'yi gönderiyoruz
+          })
+        });
 
-      const data = await response.json();
-      addMessage("Güzide Yapay Zeka", data.reply || "Bir şeyler ters gitti...", "bot");
-    } catch (err) {
-      addMessage("Güzide Yapay Zeka", "Sunucuya ulaşılamadı.", "bot");
-      console.error(err);
+        const data = await response.json();
+        addMessage("Güzide Yapay Zeka", data.reply || "Bir şeyler ters gitti...", "bot");
+      } catch (err) {
+        addMessage("Güzide Yapay Zeka", "Sunucuya ulaşılamadı.", "bot");
+        console.error(err);
+      }
     }
-  }
 
-  function addMessage(sender, text, type) {
-    const messagesDiv = document.getElementById("messages");
-    const msg = document.createElement("div");
-    msg.style.margin = "5px 0";
-    msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
-    messagesDiv.appendChild(msg);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
-</script>
+    function addMessage(sender, text, type) {
+      const messagesDiv = document.getElementById("messages");
+      const msg = document.createElement("div");
+      msg.style.margin = "5px 0";
+      msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // --- YENİ EKLENEN KOD BAŞLANGICI ---
+    const userInput = document.getElementById('userInput'); // Input elementini seçiyoruz
+
+    userInput.addEventListener('keypress', function(event) {
+        // Eğer basılan tuş "Enter" ise
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Enter tuşunun varsayılan hareketini engelle (örn: yeni satır oluşturma)
+            sendMessage(); // Mesaj gönderme fonksiyonunu çağır
+        }
+    });
+    // --- YENİ EKLENEN KOD BİTİŞİ ---
+
+  </script>
 
   <footer>© 2025 Demo site</footer>
 
