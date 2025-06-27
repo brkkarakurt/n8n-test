@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ürün Listesi</title>
   <style>
+    /* CSS kodlarınız burada */
     * {
       margin: 0;
       padding: 0;
@@ -83,21 +84,18 @@
 
   <main class="container">
     
-    <!-- Akıllı Saat -->
     <div class="card">
       
       <h2>Akıllı Saat</h2>
       <p>Adım sayar, nabız ölçer ve bildirimlerle hayatınızı kolaylaştırır.</p>
     </div>
 
-    <!-- Akıllı Buzdolabı -->
     <div class="card">
       
       <h2>Akıllı Buzdolabı</h2>
       <p>İnternet bağlantılı, içini görebileceğiniz modern buzdolabı.</p>
     </div>
 
-    <!-- Akıllı Telefon -->
     <div class="card">
       
       <h2>Akıllı Telefon</h2>
@@ -107,8 +105,7 @@
   </main>
 
 
-  <!-- Chatbot Kutusu -->
-<div id="chatbox" style="position: fixed; bottom: 20px; right: 20px; width: 320px; max-height: 400px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: white; display: flex; flex-direction: column; overflow: hidden; font-family: Arial, sans-serif;">
+  <div id="chatbox" style="position: fixed; bottom: 20px; right: 20px; width: 320px; max-height: 400px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: white; display: flex; flex-direction: column; overflow: hidden; font-family: Arial, sans-serif;">
   <div style="background: #333; color: white; padding: 10px; text-align: center;">Asistan</div>
   <div id="messages" style="flex: 1; padding: 10px; overflow-y: auto; font-size: 14px;"></div>
   <div style="display: flex; border-top: 1px solid #ddd;">
@@ -118,7 +115,22 @@
 </div>
 
 <script>
-  const webhookURL = "https://burakkarakurt.app.n8n.cloud/webhook/ec2aff1f-0b8f-46c1-b43a-0c36241cff13"; // Production URL olduğundan emin ol
+  const webhookURL = "https://burakkarakurt.app.n8n.cloud/webhook/ec2aff1f-0b8f-46c1-b43a-0c36241cff13"; // Üretim URL'si olduğundan emin olun
+
+  // Benzersiz bir oturum ID'si oluştur veya mevcut olanı kullan
+  function getSessionId() {
+    let sessionId = localStorage.getItem('chatbotSessionId');
+    if (!sessionId) {
+      // Eğer yoksa, yeni ve benzersiz bir ID oluştur (UUID v4 gibi)
+      sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      localStorage.setItem('chatbotSessionId', sessionId);
+    }
+    return sessionId;
+  }
 
   async function sendMessage() {
     const input = document.getElementById("userInput");
@@ -128,6 +140,8 @@
     addMessage("Sen", message, "user");
     input.value = "";
 
+    const currentSessionId = getSessionId(); // Burada benzersiz oturum ID'sini alıyoruz
+
     try {
       const response = await fetch(webhookURL, {
         method: "POST",
@@ -135,15 +149,15 @@
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          userMessage: message, // 🔧 mesajı bu isimle gönder
-          sessionId: "user-1234" // 🧠 simple memory için sabit session ID önerilir
+          userMessage: message,
+          sessionId: currentSessionId // Buraya dinamik olarak oluşturulan ID'yi gönderiyoruz
         })
       });
 
       const data = await response.json();
-      addMessage("Bot", data.reply || "Bir şeyler ters gitti...", "bot");
+      addMessage("Güzide Yapay Zeka", data.reply || "Bir şeyler ters gitti...", "bot");
     } catch (err) {
-      addMessage("Bot", "Sunucuya ulaşılamadı.", "bot");
+      addMessage("Güzide Yapay Zeka", "Sunucuya ulaşılamadı.", "bot");
       console.error(err);
     }
   }
