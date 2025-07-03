@@ -155,7 +155,7 @@
         });
 
         const data = await response.json();
-        addMessage("Güzide Yapay Zeka", data.response || "Bir şeyler ters gitti...", "bot");
+        addMessage("Güzide Yapay Zeka", data.reply || "Bir şeyler ters gitti...", "bot");
       } catch (err) {
         addMessage("Güzide Yapay Zeka", "Sunucuya ulaşılamadı.", "bot");
         console.error(err);
