@@ -118,20 +118,22 @@
     const webhookURL = "https://brkkarakurt.app.n8n.cloud/webhook/ec2aff1f-0b8f-46c1-b43a-0c36241cff13"; // Üretim URL'si olduğundan emin olun
 
     function getSessionId() {
-  // Sayfa yenilendiğinde önceki sessionId'yi temizle
-  localStorage.removeItem('chatbotSessionId');
-
-  // Yeni sessionId oluştur
-  let sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0,
-        v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-
-  localStorage.setItem('chatbotSessionId', sessionId);
-
+  // localStorage yerine sessionStorage kullanalım
+  let sessionId = sessionStorage.getItem('chatbotSessionId');
+  if (!sessionId) {
+    sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    sessionStorage.setItem('chatbotSessionId', sessionId);
+  }
   return sessionId;
 }
+
+// API çağrısı yaparken:
+const sessionId = getSessionId();
+// Bu sessionId'yi API'ye gönder
 
     async function sendMessage() {
       const input = document.getElementById("userInput");
